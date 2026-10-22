@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kalkulator Persen Ojol</title>
+<style>
+  :root{
+    --ink:#0f172a;
+    --muted:#64748b;
+    --line:#e8edf5;
+    --accent:#6366f1;
+    --accent2:#a855f7;
+    --green:#10b981;
+    --amber:#f59e0b;
+    --red:#ef4444;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    font-family:'Segoe UI',system-ui,-apple-system,sans-serif;
+    color:var(--ink);
+    min-height:100vh;
+    padding:28px 16px 64px;
+    background:
+      radial-gradient(circle at 8% 0%, #dbeafe 0%, transparent 45%),
+      radial-gradient(circle at 92% 8%, #dcfce7 0%, transparent 42%),
+      #f8fafc;
+  }
+  .wrap{max-width:720px;margin:0 auto}
+  header{margin-bottom:22px}
+  .badge{
+    display:inline-block;font-size:12px;font-weight:700;letter-spacing:.5px;
+    text-transform:uppercase;color:#0e7490;background:#e0f2fe;
+    padding:7px 13px;border-radius:99px;margin-bottom:14px;
+  }
+  h1{font-size:clamp(26px,6vw,36px);line-height:1.15;letter-spacing:-.8px;font-weight:800}
+  h1 .grad{background:linear-gradient(135deg,#0ea5e9,#6366f1,#10b981);
+    -webkit-background-clip:text;background-clip:text;color:transparent}
+  .sub{margin-top:12px;color:var(--muted);font-size:15px;line-height:1.6;max-width:58ch}
+
+  .card{
+    background:#fff;border:1px solid var(--line);border-radius:22px;
+    padding:22px;box-shadow:0 10px 34px rgba(15,23,42,.06);
+    margin-bottom:16px;
+  }
+
+  /* Tabs */
+  .tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;background:#f1f5f9;padding:6px;border-radius:16px;margin-bottom:22px}
+  .tabs button{
+    border:0;background:transparent;padding:13px 6px;border-radius:11px;
+    font-family:inherit;font-size:13px;font-weight:700;color:#64748b;
+    cursor:pointer;transition:.18s;
+  }
+  .tabs button.active{background:#fff;color:#0ea5e9;box-shadow:0 3px 12px rgba(14,165,233,.18)}
+
+  .tab-content{display:none}
+  .tab-content.active{display:block}
+
+  .field{margin-bottom:18px}
+  .field:last-child{margin-bottom:0}
+  label{display:block;font-size:13.5px;font-weight:700;margin-bottom:8px;color:#334155}
+  .hint{font-size:12px;color:#94a3b8;font-weight:600;margin-left:4px}
+  .input-wrap{
+    display:flex;align-items:center;gap:8px;background:#fff;
+    border:1.5px solid var(--line);border-radius:14px;padding:0 14px;
+    transition:.18s;
+  }
+  .input-wrap:focus-within{border-color:var(--accent);box-shadow:0 0 0 4px rgba(99,102,241,.12)}
+  .input-wrap span{color:#94a3b8;font-weight:700;font-size:14px}
+  .input-wrap input{
+    border:0;outline:0;background:transparent;width:100%;
+    padding:14px 0;font-size:16px;font-weight:700;font-family:inherit;color:var(--ink);
+  }
+  .input-wrap input[type="number"]::-webkit-outer-spin-button,
+  .input-wrap input[type="number"]::-webkit-inner-spin-button{ -webkit-appearance:none; margin:0; }
+  .input-wrap input[type="number"]{ -moz-appearance:textfield; }
+
+  .row2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+
+  .presets{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+  .presets button{
+    border:1.5px solid #e2e8f0;background:#fff;color:#475569;
+    padding:8px 13px;border-radius:99px;font-family:inherit;
+    font-size:12.5px;font-weight:700;cursor:pointer;transition:.18s;
+  }
+  .presets button:hover{border-color:#bae6fd;color:#0284c7}
+  .presets button.active{background:#e0f2fe;border-color:#bae6fd;color:#0284c7}
+
+  /* Result */
+  .result-box{
+    margin-top:22px;background:#f8fafc;border:1px solid #eef2f8;
+    border-radius:16px;padding:20px 18px;text-align:center;
+  }
+  .result-label{font-size:12.5px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.4px}
+  .result-value{
+    font-size:clamp(28px,8vw,42px);font-weight:800;letter-spacing:-1px;line-height:1.2;margin:6px 0 4px;
+    background:linear-gradient(135deg,#0ea5e9,#6366f1);
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+  }
+  .result-value.green{background:linear-gradient(135deg,#10b981,#059669);-webkit-background-clip:text;background-clip:text}
+  .result-sub{font-size:13.5px;color:var(--muted);line-height:1.6}
+  .result-sub b{color:#1e293b}
+
+  /* Mini grid */
+  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:16px}
+  .mini{background:#f8fafc;border:1px solid #eef2f8;border-radius:15px;padding:14px 8px;text-align:center}
+  .mini-label{font-size:11px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.4px}
+  .mini-value{font-size:15px;font-weight:800;margin-top:5px;color:#1e293b;letter-spacing:-.3px}
+  .mini-value.neg{color:var(--red)}
+  .mini-value.pos{color:var(--green)}
+
+  /* Stacked bar */
+  .bar-wrap{margin-top:18px}
+  .bar-head{display:flex;justify-content:space-between;font-size:12px;font-weight:700;color:#64748b;margin-bottom:8px}
+  .stack{display:flex;height:14px;border-radius:99px;overflow:hidden;background:#e2e8f0}
+  .stack > div{transition:width .45s cubic-bezier(.2,.8,.2,1)}
+  .seg-komisi{background:#f59e0b}
+  .seg-ops{background:#f43f5e}
+  .seg-bersih{background:#10b981}
+  .legend{display:flex;gap:14px;flex-wrap:wrap;margin-top:10px;font-size:11.5px;color:#64748b;font-weight:600}
+  .legend span{display:inline-flex;align-items:center;gap:6px}
+  .legend i{width:9px;height:9px;border-radius:99px;display:inline-block}
+
+  .formula{
+    background:#f8fafc;border-radius:14px;padding:14px 16px;margin-top:16px;
+    font-size:12.5px;color:#64748b;line-height:1.7;border:1px dashed #dbe2ea;
+  }
+  .formula code{background:#e0f2fe;color:#0284c7;padding:2px 6px;border-radius:6px;font-weight:700}
+
+  .warn{
+    margin-top:16px;background:#fff7ed;border:1px solid #fed7aa;color:#9a3412;
+    border-radius:15px;padding:15px 17px;font-size:13.5px;line-height:1.6;font-weight:600;
+  }
+  .warn.ok{background:#f0fdf4;border-color:#bbf7d0;color:#166534}
+
+  .tips h3{font-size:15px;font-weight:800;margin-bottom:12px}
+  .tips ul{list-style:none;display:grid;gap:10px}
+  .tips li{font-size:13.5px;color:var(--muted);line-height:1.6;padding-left:26px;position:relative}
+  .tips li::before{content:"✓";position:absolute;left:0;top:0;color:var(--green);font-weight:900}
+
+  @media (max-width:560px){
+    .tabs button{font-size:11.5px;padding:12px 2px}
+    .row2{grid-template-columns:1fr;gap:0}
+    .mini-value{font-size:13px}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="badge">🛵 Kalkulator Ojol</div>
+    <h1>Hitungan <span class="grad">Persen di Ojol</span></h1>
+    <p class="sub">Hitung potongan komisi aplikasi, biaya operasional (bensin, parkir, makan), dan pendapatan bersih yang benar-benar masuk kantong.</p>
+  </header>
+
+  <section class="card">
+    <div class="tabs" id="tabs">
+      <button data-tab="tab1" class="active">Potongan & Bersih</button>
+      <button data-tab="tab2">Cek Persen</button>
+      <button data-tab="tab3">Target Harian</button>
+    </div>
+
+    <!-- ========== TAB 1 ========== -->
+    <div id="tab1" class="tab-content active">
+      <div class="row2">
+        <div class="field">
+          <label for="gross">Pendapatan kotor <span class="hint">hari ini</span></label>
+          <div class="input-wrap"><span>Rp</span><input id="gross" type="number" step="any" inputmode="numeric" value="250000"></div>
+        </div>
+        <div class="field">
+          <label for="komisi">Komisi aplikasi</label>
+          <div class="input-wrap"><span>%</span><input id="komisi" type="number" step="any" value="20"></div>
+          <div class="presets" id="presetKomisi">
+            <button data-pct="15">15%</button>
+            <button data-pct="20" class="active">20%</button>
+            <button data-pct="25">25%</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="row2">
+        <div class="field">
+          <label for="ops">Biaya operasional <span class="hint">bensin, parkir, makan</span></label>
+          <div class="input-wrap"><span>Rp</span><input id="ops" type="number" step="any" inputmode="numeric" value="45000"></div>
+        </div>
+        <div class="field">
+          <label for="orders">Jumlah order <span class="hint">opsional</span></label>
+          <div class="input-wrap"><span>#</span><input id="orders" type="number" step="any" inputmode="numeric" value="12"></div>
+        </div>
+      </div>
+
+      <div class="result-box">
+        <div class="result-label">Pendapatan bersih</div>
+        <div class="result-value green" id="netVal">—</div>
+        <div class="result-sub" id="netSub">Isi pendapatan kotor dulu ya.</div>
+      </div>
+
+      <div class="grid3">
+        <div class="mini"><div class="mini-label">Komisi</div><div class="mini-value" id="miniKomisi">—</div></div>
+        <div class="mini"><div class="mini-label">Operasional</div><div class="mini-value" id="miniOps">—</div></div>
+        <div class="mini"><div class="mini-label">Bersih / order</div><div class="mini-value" id="miniOrder">—</div></div>
+      </div>
+
+      <div class="bar-wrap">
+        <div class="bar-head"><span>Rincian dari pendapatan kotor</span><span id="barPct">—</span></div>
+        <div class="stack">
+          <div class="seg-komisi" id="segKomisi" style="width:0%"></div>
+          <div class="seg-ops" id="segOps" style="width:0%"></div>
+          <div class="seg-bersih" id="segBersih" style="width:0%"></div>
+        </div>
+        <div class="legend">
+          <span><i style="background:#f59e0b"></i>Komisi</span>
+          <span><i style="background:#f43f5e"></i>Operasional</span>
+          <span><i style="background:#10b981"></i>Bersih</span>
+        </div>
+      </div>
+
+      <div class="warn" id="warn1" hidden></div>
+
+      <div class="formula">
+        <code>komisi = kotor × %komisi</code><br>
+        <code>bersih = kotor − komisi − operasional</code><br>
+        <code>% bersih = bersih ÷ kotor × 100</code>
+      </div>
+    </div>
+
+    <!-- ========== TAB 2 ========== -->
+    <div id="tab2" class="tab-content">
+      <div class="field">
+        <label for="grossRev">Pendapatan kotor</label>
+        <div class="input-wrap"><span>Rp</span><input id="grossRev" type="number" step="any" inputmode="numeric" value="250000"></div>
+      </div>
+      <div class="field">
+        <label for="amountRev">Nominal yang mau dicek</label>
+        <div class="input-wrap"><span>Rp</span><input id="amountRev" type="number" step="any" inputmode="numeric" value="50000"></div>
+      </div>
+
+      <div class="result-box">
+        <div class="result-label">Persentase dari pendapatan kotor</div>
+        <div class="result-value" id="revVal">—</div>
+        <div class="result-sub" id="revSub">Isi nominal dan pendapatan kotor di atas.</div>
+      </div>
+
+      <div class="formula"><code>persen = (nominal ÷ pendapatan kotor) × 100</code></div>
+
+      <div class="warn" id="warn2" hidden></div>
+    </div>
+
+    <!-- ========== TAB 3 ========== -->
+    <div id="tab3" class="tab-content">
+      <div class="row2">
+        <div class="field">
+          <label for="targetNet">Target bersih <span class="hint">per hari</span></label>
+          <div class="input-wrap"><span>Rp</span><input id="targetNet" type="number" step="any" inputmode="numeric" value="150000"></div>
+        </div>
+        <div class="field">
+          <label for="komisi3">Komisi aplikasi</label>
+          <div class="input-wrap"><span>%</span><input id="komisi3" type="number" step="any" value="20"></div>
+          <div class="presets" id="presetKomisi3">
+            <button data-pct="15">15%</button>
+            <button data-pct="20" class="active">20%</button>
+            <button data-pct="25">25%</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="row2">
+        <div class="field">
+          <label for="ops3">Operasional <span class="hint">per hari</span></label>
+          <div class="input-wrap"><span>Rp</span><input id="ops3" type="number" step="any" inputmode="numeric" value="45000"></div>
+        </div>
+        <div class="field">
+          <label for="tarif">Tarif rata-rata / order <span class="hint">opsional</span></label>
+          <div class="input-wrap"><span>Rp</span><input id="tarif" type="number" step="any" inputmode="numeric" value="21000"></div>
+        </div>
+      </div>
+
+      <div class="result-box">
+        <div class="result-label">Pendapatan kotor yang perlu dicapai</div>
+        <div class="result-value" id="needGross">—</div>
+        <div class="result-sub" id="needSub">Isi target bersih dulu ya.</div>
+      </div>
+
+      <div class="grid3">
+        <div class="mini"><div class="mini-label">Order dibutuhkan</div><div class="mini-value" id="needOrders">—</div></div>
+        <div class="mini"><div class="mini-label">Bersih / order</div><div class="mini-value" id="netPerOrder">—</div></div>
+        <div class="mini"><div class="mini-label">Jam kerja (±3 order/jam)</div><div class="mini-value" id="needJam">—</div></div>
+      </div>
+
+      <div class="warn" id="warn3" hidden></div>
+
+      <div class="formula">
+        <code>kotor = (target + operasional) ÷ (1 − komisi/100)</code><br>
+        <code>order = kotor ÷ tarif per order</code>
+      </div>
+    </div>
+  </section>
+
+  <section class="card tips">
+    <h3>Catatan buat driver</h3>
+    <ul>
+      <li><b>Komisi bukan satu-satunya potongan.</b> Masih ada bensin, parkir, makan, servis, dan kuota. Hitung semuanya supaya angkanya jujur.</li>
+      <li><b>Persentase bersih di bawah 50% itu alarm.</b> Kalau operasional harianmu terlalu besar, coba kurangi jarak kosong atau atur jam kerja.</li>
+      <li><b>Target harian sebaiknya dihitung setelah operasional,</b> bukan dari pendapatan kotor — biar nggak kaget di akhir bulan.</li>
+      <li><b>Sisihkan untuk servis dan ban.</b> Ini biaya yang datang tiba-tiba, bukan "kalau ada lebih".</li>
+    </ul>
+  </section>
+
+</div>
+
+<script>
+  const $ = id => document.getElementById(id);
+
+  function formatRp(n) {
+    if (!isFinite(n)) return '—';
+    const rounded = Math.round(n);
+    const sign = rounded < 0 ? '−' : '';
+    return sign + 'Rp ' + Math.abs(rounded).toLocaleString('id-ID');
+  }
+  function formatPct(n) {
+    if (!isFinite(n)) return '—';
+    const rounded = Math.round(n * 100) / 100;
+    return rounded.toLocaleString('id-ID', { maximumFractionDigits: 2 }) + '%';
+  }
+  function getNum(id) {
+    const v = parseFloat($(id).value);
+    return isNaN(v) ? 0 : v;
+  }
+
+  /* ---------- Tabs ---------- */
+  const tabs = document.querySelectorAll('#tabs button');
+  const contents = document.querySelectorAll('.tab-content');
+  tabs.forEach(btn => {
+    btn.addEventListener('click', () => {
+      tabs.forEach(b => b.classList.remove('active'));
+      contents.forEach(c => c.classList.remove('active'));
+      btn.classList.add('active');
+      $(btn.dataset.tab).classList.add('active');
+    });
+  });
+
+  /* ---------- Presets komisi ---------- */
+  function bindPresets(wrapperId, inputId, onChange) {
+    document.querySelectorAll('#' + wrapperId + ' button').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('#' + wrapperId + ' button').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        $(inputId).value = btn.dataset.pct;
+        onChange();
+      });
+    });
+  }
+
+  /* ================= TAB 1 ================= */
+  function hitungTab1() {
+    const gross  = getNum('gross');
+    const komPct = getNum('komisi');
+    const ops    = getNum('ops');
+    const orders = getNum('orders');
+    const warn   = $('warn1');
+
+    if (gross <= 0) {
+      $('netVal').textContent = '—';
+      $('netSub').textContent = 'Isi pendapatan kotor dulu ya.';
+      ['miniKomisi','miniOps','miniOrder'].forEach(id => $(id).textContent = '—');
+      ['segKomisi','segOps','segBersih'].forEach(id => $(id).style.width = '0%');
+      $('barPct').textContent = '—';
+      warn.hidden = true;
+      return;
+    }
+
+    const komisi   = gross * komPct / 100;
+    const afterKom = gross - komisi;
+    const bersih   = afterKom - ops;
+    const pctBersih = (bersih / gross) * 100;
+
+    $('netVal').textContent = formatRp(bersih);
+    $('netVal').className = 'result-value ' + (bersih >= 0 ? 'green' : '');
+
+    $('netSub').innerHTML =
+      `Dari kotor <b>${formatRp(gross)}</b> → komisi <b>${formatRp(komisi)}</b> (${formatPct(komPct)}) ` +
+      `→ operasional <b>${formatRp(ops)}</b>. Sisa bersih <b>${formatPct(pctBersih)}</b> dari pendapatan kotor.`;
+
+    // mini
+    $('miniKomisi').textContent = formatRp(komisi);
+    $('miniOps').textContent = formatRp(ops);
+
+    if (orders > 0) {
+      $('miniOrder').textContent = formatRp(bersih / orders);
+      $('miniOrder').className = 'mini-value ' + (bersih >= 0 ? 'pos' : 'neg');
+    } else {
+      $('miniOrder').textContent = formatRp(afterKom);
+      $('miniOrder').className = 'mini-value';
+    }
+
+    // stacked bar
+    const totalBase = Math.max(gross, komisi + ops);
+    const wKom = (komisi / totalBase) * 100;
+    const wOps = (ops / totalBase) * 100;
+    const wNet = Math.max(0, (bersih / totalBase) * 100);
+
+    $('segKomisi').style.width = wKom + '%';
+    $('segOps').style.width    = wOps + '%';
+    $('segBersih').style.width = wNet + '%';
+    $('barPct').textContent    = formatPct(pctBersih) + ' bersih';
+
+    // warning
+    if (bersih < 0) {
+      warn.hidden = false;
+      warn.className = 'warn';
+      warn.textContent = 'Pendapatan bersihmu minus — operasional melebihi sisa setelah komisi. Cek lagi biaya harian atau tambah order.';
+    } else if (pctBersih < 50) {
+      warn.hidden = false;
+      warn.className = 'warn';
+      warn.textContent = `Bersihmu hanya ${formatPct(pctBersih)} dari pendapatan kotor. Masih bisa jalan, tapi coba tekan operasional atau tingkatkan pendapatan kotor.`;
+    } else {
+      warn.hidden = false;
+      warn.className = 'warn ok';
+      warn.textContent = `Sehat 👍 Kamu membawa pulang ${formatPct(pctBersih)} dari pendapatan kotor.`;
+    }
+  }
+
+  /* ================= TAB 2 ================= */
+  function hitungTab2() {
+    const gross  = getNum('grossRev');
+    const amount = getNum('amountRev');
+    const warn   = $('warn2');
+
+    if (gross <= 0) {
+      $('revVal').textContent = '—';
+      $('revSub').textContent = 'Isi pendapatan kotor dulu ya.';
+      warn.hidden = true;
+      return;
+    }
+
+    const pct = (amount / gross) * 100;
+    $('revVal').textContent = formatPct(pct);
+    $('revSub').innerHTML =
+      `<b>${formatRp(amount)}</b> adalah <b>${formatPct(pct)}</b> dari pendapatan kotor <b>${formatRp(gross)}</b>`;
+
+    if (pct > 100) {
+      warn.hidden = false;
+      warn.className = 'warn';
+      warn.textContent = 'Nominal yang dicek lebih besar dari pendapatan kotor.';
+    } else {
+      warn.hidden = true;
+    }
+  }
+
+  /* ================= TAB 3 ================= */
+  function hitungTab3() {
+    const target   = getNum('targetNet');
+    const komPct   = getNum('komisi3');
+    const ops      = getNum('ops3');
+    const tarif    = getNum('tarif');
+    const warn     = $('warn3');
+
+    if (target <= 0) {
+      $('needGross').textContent = '—';
+      $('needSub').textContent = 'Isi target bersih dulu ya.';
+      ['needOrders','netPerOrder','needJam'].forEach(id => $(id).textContent = '—');
+      warn.hidden = true;
+      return;
+    }
+
+    if (komPct >= 100) {
+      $('needGross').textContent = '—';
+      $('needSub').textContent = 'Komisi 100% atau lebih — nggak mungkin sampai target.';
+      ['needOrders','netPerOrder','needJam'].forEach(id => $(id).textContent = '—');
+      warn.hidden = true;
+      return;
+    }
+
+    const grossNeeded = (target + ops) / (1 - komPct / 100);
+    $('needGross').textContent = formatRp(grossNeeded);
+    $('needSub').innerHTML =
+      `Untuk dapat bersih <b>${formatRp(target)}</b> dengan komisi <b>${formatPct(komPct)}</b> ` +
+      `dan operasional <b>${formatRp(ops)}</b>, kamu perlu pendapatan kotor <b>${formatRp(grossNeeded)}</b>.`;
+
+    // bersih per order (setelah komisi, sebelum operasional harian)
+    const netPerOrderVal = tarif * (1 - komPct / 100);
+    $('netPerOrder').textContent = tarif > 0 ? formatRp(netPerOrderVal) : '—';
+    $('netPerOrder').className = 'mini-value ' + (netPerOrderVal >= 0 ? 'pos' : 'neg');
+
+    if (tarif > 0) {
+      const orders = Math.ceil(grossNeeded / tarif);
+      $('needOrders').textContent = orders + ' order';
+      $('needJam').textContent = (orders / 3).toFixed(1) + ' jam';
+    } else {
+      $('needOrders').textContent = '—';
+      $('needJam').textContent = '—';
+    }
+
+    if (tarif > 0 && netPerOrderVal <= 0) {
+      warn.hidden = false;
+      warn.className = 'warn';
+      warn.textContent = 'Tarif per order terlalu kecil dibanding komisi — bersih per order nol atau minus.';
+    } else {
+      warn.hidden = true;
+    }
+  }
+
+  /* ---------- Event listeners ---------- */
+  ['gross','komisi','ops','orders'].forEach(id => $(id).addEventListener('input', hitungTab1));
+  ['grossRev','amountRev'].forEach(id => $(id).addEventListener('input', hitungTab2));
+  ['targetNet','komisi3','ops3','tarif'].forEach(id => $(id).addEventListener('input', hitungTab3));
+
+  bindPresets('presetKomisi', 'komisi', hitungTab1);
+  bindPresets('presetKomisi3', 'komisi3', hitungTab3);
+
+  /* ---------- Init ---------- */
+  hitungTab1();
+  hitungTab2();
+  hitungTab3();
+</script>
+</body>
+</html>
